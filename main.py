@@ -15,7 +15,6 @@ class DatabaseConnection:
         self.password = password
         self.database = database
 
-
     def connect(self):
         connection = mysql.connector.connect(host=self.host, user=self.user, password=self.password,
                                              database=self.database)
@@ -87,7 +86,13 @@ class MainWindow(QMainWindow):
 
     def load_data(self):
         connection = DatabaseConnection().connect()
-        result = connection.execute("SELECT * FROM students")
+
+        # With MySQL always create cursor object no matter what =)
+        cursor = connection.cursor()
+        cursor.execute("SELECT * FROM students")
+
+        # With MySQL to get data we should cursor.fetchall()
+        result = cursor.fetchall()
 
         self.table.setRowCount(0)
 
@@ -175,7 +180,7 @@ class InsertDialog(QDialog):
         if name != "" and mobile != "":
             connection = DatabaseConnection().connect()
             cursor = connection.cursor()
-            cursor.execute("INSERT INTO students (name, course, mobile) VALUES (?, ?, ?)",
+            cursor.execute("INSERT INTO students (name, course, mobile) VALUES (%s, %s, %s)",
                            (name, course, mobile))
             connection.commit()
             cursor.close()
@@ -223,7 +228,8 @@ class SearchDialog(QDialog):
 
         connection = DatabaseConnection().connect()
         cursor = connection.cursor()
-        result = cursor.execute("SELECT * FROM students WHERE name = ?", (name,))
+        cursor.execute("SELECT * FROM students WHERE name = %s", (name,))
+        result = cursor.fetchall()
         rows = list(result)
         print(rows)
 
@@ -283,7 +289,7 @@ class EditDialog(QDialog):
     def update_student(self):
         connection = DatabaseConnection().connect()
         cursor = connection.cursor()
-        cursor.execute("UPDATE students SET name = ?, course = ?, mobile = ? WHERE id = ?",
+        cursor.execute("UPDATE students SET name = %s, course = %s, mobile = %s WHERE id = %s",
                        (self.name.text(),
                         self.course_name.itemText(self.course_name.currentIndex()),
                         self.mobile.text(),
@@ -326,7 +332,7 @@ class DeleteDialog(QDialog):
         cursor = connection.cursor()
 
         # Making sure to add a comma in the tuple, because if there is no a single comma, it won't be read as tuple
-        cursor.execute("DELETE from students WHERE id = ?", (student_id,))
+        cursor.execute("DELETE from students WHERE id = %s", (student_id,))
         connection.commit()
         cursor.close()
         connection.close()
