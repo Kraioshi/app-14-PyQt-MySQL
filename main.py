@@ -1,10 +1,10 @@
 import sys
-import sqlite3
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QApplication, QVBoxLayout, QLabel, QWidget, QGridLayout, \
+from PyQt6.QtWidgets import QApplication, QVBoxLayout, QLabel, QGridLayout, \
     QLineEdit, QPushButton, QMainWindow, QTableWidget, QTableWidgetItem, QDialog, QComboBox, QToolBar, QStatusBar, \
     QMessageBox
 from PyQt6.QtGui import QAction, QIcon
+import sqlite3
 import mysql.connector
 
 
@@ -330,6 +330,12 @@ class DeleteDialog(QDialog):
 
         connection = DatabaseConnection().connect()
         cursor = connection.cursor()
+
+        # Making sure to add a comma in the tuple, because if there is no a single comma, it won't be read as tuple
+        cursor.execute("DELETE from students WHERE id = %s", (student_id,))
+        connection.commit()
+        cursor.close()
+        connection.close()
 
         # Making sure to add a comma in the tuple, because if there is no a single comma, it won't be read as tuple
         cursor.execute("DELETE from students WHERE id = %s", (student_id,))
