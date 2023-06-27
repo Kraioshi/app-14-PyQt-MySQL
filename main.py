@@ -337,11 +337,7 @@ class DeleteDialog(QDialog):
         cursor.close()
         connection.close()
 
-        # Making sure to add a comma in the tuple, because if there is no a single comma, it won't be read as tuple
-        cursor.execute("DELETE from students WHERE id = %s", (student_id,))
-        connection.commit()
-        cursor.close()
-        connection.close()
+
 
         # Refreshing table
         project.load_data()
